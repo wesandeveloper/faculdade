@@ -1,119 +1,129 @@
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.5/jquery.inputmask.min.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
-<link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-icons.min.css">
-<br><br>
-<div class="columns">
-    <div class="col-4 column">
-        <form method="POST" style="max-width: 250px;" class="col-mx-auto" id="create">
-            <label for="marca"><small>Marca *</small></label><br>
-            <input type="text" id="marca" name="marca"><br>
-            <label for="modelo"><small>Modelo - Ano</small></label><br>
-            <input type="number" min="1900" id="modelo" name="modelo" placeholder="Min: 1900"><br>
-            <label for="placa"><small>Placa</small></label><br>
-            <input type="text" id="placa" placeholder="___-____" name="placa">
-            <small class="my-2 d-block">Os campos com (*) são obrigatorios.</small>
-            <button type="submit" class="btn btn-success btn-sm">Salvar <i class="icon icon-check"></i></button>
-            <button type="reset" class="btn btn-link btn-sm">Limpar</button>
-        </form>
-        <form style="max-width: 250px;" class="col-mx-auto" method="GET">
-            <input type="text" class="mt-2" placeholder="Marca" id="search" name="marca">
-            <br>
-            <small>Ano de Fabricação</small><br>
-            <small>De:</small>
-            <input type="number" name="de" id="de" style="max-width: 100px;" value="1900" min="1900" class="mt-2 mb-1 ml-1" placeholder="YYYY"><br>
-            <small>Até:</small>
-            <input type="number" name="ate" id="ate" style="max-width: 100px;" value="2020" min="1900" class="mt-2 mb-1" placeholder="YYYY"><br>
-            <button type="submit" class="btn btn-primary btn-sm">Pesquisar <i class="icon icon-search"></i></button>
-            <a href="?" class="btn btn-link btn-sm">Limpar</a>
-        </form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Veiculos</title>
+</head>
+<body>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.5/jquery.inputmask.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-icons.min.css">
+    <br><br>
+    <div class="columns">
+        <div class="col-4 column">
+            <form method="POST" style="max-width: 250px;" class="col-mx-auto" id="create">
+                <label for="marca"><small>Marca *</small></label><br>
+                <input type="text" id="marca" name="marca"><br>
+                <label for="modelo"><small>Modelo - Ano</small></label><br>
+                <input type="number" min="1900" id="modelo" name="modelo" placeholder="Min: 1900"><br>
+                <label for="placa"><small>Placa</small></label><br>
+                <input type="text" id="placa" placeholder="___-____" name="placa">
+                <small class="my-2 d-block">Os campos com (*) são obrigatorios.</small>
+                <button type="submit" class="btn btn-success btn-sm">Salvar <i class="icon icon-check"></i></button>
+                <button type="reset" class="btn btn-link btn-sm">Limpar</button>
+            </form>
+            <form style="max-width: 250px;" class="col-mx-auto" method="GET">
+                <input type="text" class="mt-2" placeholder="Marca" id="search" name="marca">
+                <br>
+                <small>Ano de Fabricação</small><br>
+                <small>De:</small>
+                <input type="number" name="de" id="de" style="max-width: 100px;" value="1900" min="1900" class="mt-2 mb-1 ml-1" placeholder="YYYY"><br>
+                <small>Até:</small>
+                <input type="number" name="ate" id="ate" style="max-width: 100px;" value="2020" min="1900" class="mt-2 mb-1" placeholder="YYYY"><br>
+                <button type="submit" class="btn btn-primary btn-sm">Pesquisar <i class="icon icon-search"></i></button>
+                <a href="?" class="btn btn-link btn-sm">Limpar</a>
+            </form>
+        </div>
+        <div class="col-7 column">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Marca</th>
+                        <th>Modelo - Ano</th>
+                        <th>Placa</th>
+                    </tr>
+                </thead>
+                <tbody id="veiculos"></tbody>
+            </table>
+        </div>
     </div>
-    <div class="col-7 column">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Marca</th>
-                    <th>Modelo - Ano</th>
-                    <th>Placa</th>
-                </tr>
-            </thead>
-            <tbody id="veiculos"></tbody>
-        </table>
-    </div>
-</div>
-<script>
-    $(document).ready(function(){
-        $("#placa").inputmask({mask: 'AAA-9999'});
-    })
-    var url = new URL(location.href)
-    if(localStorage.getItem('veiculos')==null){
-        localStorage.setItem('veiculos', JSON.stringify([{
-            marca: 'Renault Logan',
-            modelo: 2020,
-            placa: 'AAA-0000'
-        },{
-            marca: 'Volkswagen Fusca',
-            modelo: 1986,
-            placa: 'BBB-0000'
-        }]))
-    }
-    var veiculos = {
-        all: [],
-        get: function(){
-            var el = document.getElementById('veiculos')
-            var search = document.getElementById('search')
-            var method = document.getElementById('method')
-            el.innerHTML = ''
-            this.all = JSON.parse(localStorage.getItem('veiculos'))
-            this.all  = this.all.sort((a,b)=>{
-                if(a.modelo<b.modelo) return -1;
-                if(a.modelo>b.modelo) return 1;
-                return 0;
-            })
-            .filter(i=>{
-                var marca = url.searchParams.get('marca')||""
-                var de    = parseInt(url.searchParams.get('de'))
-                var ate   = parseInt(url.searchParams.get('ate'))
-                var name = i.marca||""
-                if(marca!=="")
-                    if(name.toLowerCase().indexOf(marca.toLowerCase())>-1) return i;
-                    else return 0;
-                else if(!isNaN(de)&&!isNaN(ate)){
-                    document.getElementById('de').value = de 
-                    document.getElementById('ate').value = ate
-                    if(i.modelo>=de&&i.modelo<=ate) return i;
-                    else return 0;
-                }else return i;
-            })
-            for(var i=0; i<this.all.length;i++){
-                var veiculo = this.all[i];
-                el.innerHTML+=`
-                <tr class="active">
-                    <td>${veiculo.marca}</td>
-                    <td>${veiculo.modelo}</td>
-                    <td><small>${veiculo.placa}</small></td>
-                </tr>`
-            }
-        },
-        create: function(){
-            var el = document.getElementById('create')
-            el.addEventListener('submit', event=>{
-                event.preventDefault()
-                var data = {
-                    marca: el.marca.value,
-                    modelo: parseInt(el.modelo.value),
-                    placa: el.placa.value
+    <script>
+        $(document).ready(function(){
+            $("#placa").inputmask({mask: 'AAA-9999'});
+        })
+        var url = new URL(location.href)
+        if(localStorage.getItem('veiculos')==null){
+            localStorage.setItem('veiculos', JSON.stringify([{
+                marca: 'Renault Logan',
+                modelo: 2020,
+                placa: 'AAA-0000'
+            },{
+                marca: 'Volkswagen Fusca',
+                modelo: 1986,
+                placa: 'BBB-0000'
+            }]))
+        }
+        var veiculos = {
+            all: [],
+            get: function(){
+                var el = document.getElementById('veiculos')
+                var search = document.getElementById('search')
+                var method = document.getElementById('method')
+                el.innerHTML = ''
+                this.all = JSON.parse(localStorage.getItem('veiculos'))
+                this.all  = this.all.sort((a,b)=>{
+                    if(a.modelo<b.modelo) return -1;
+                    if(a.modelo>b.modelo) return 1;
+                    return 0;
+                })
+                .filter(i=>{
+                    var marca = url.searchParams.get('marca')||""
+                    var de    = parseInt(url.searchParams.get('de'))
+                    var ate   = parseInt(url.searchParams.get('ate'))
+                    var name = i.marca||""
+                    if(marca!=="")
+                        if(name.toLowerCase().indexOf(marca.toLowerCase())>-1) return i;
+                        else return 0;
+                    else if(!isNaN(de)&&!isNaN(ate)){
+                        document.getElementById('de').value = de 
+                        document.getElementById('ate').value = ate
+                        if(i.modelo>=de&&i.modelo<=ate) return i;
+                        else return 0;
+                    }else return i;
+                })
+                for(var i=0; i<this.all.length;i++){
+                    var veiculo = this.all[i];
+                    el.innerHTML+=`
+                    <tr class="active">
+                        <td>${veiculo.marca}</td>
+                        <td>${veiculo.modelo}</td>
+                        <td><small>${veiculo.placa}</small></td>
+                    </tr>`
                 }
-                data.modelo = isNaN(data.modelo)? new Date().getFullYear(): data.modelo
-                if(data.marca!==""&&data.modelo>=1900&&data.placa!==""){
-                    var storage = JSON.parse(localStorage.getItem('veiculos'))
-                    storage.push(data)
-                    localStorage.setItem('veiculos', JSON.stringify(storage))
-                    veiculos.get()
-                }
-            })
-        },
-    }
-    veiculos.get()
-    veiculos.create()
-</script>
+            },
+            create: function(){
+                var el = document.getElementById('create')
+                el.addEventListener('submit', event=>{
+                    event.preventDefault()
+                    var data = {
+                        marca: el.marca.value,
+                        modelo: parseInt(el.modelo.value),
+                        placa: el.placa.value
+                    }
+                    data.modelo = isNaN(data.modelo)? new Date().getFullYear(): data.modelo
+                    if(data.marca!==""&&data.modelo>=1900&&data.placa!==""){
+                        var storage = JSON.parse(localStorage.getItem('veiculos'))
+                        storage.push(data)
+                        localStorage.setItem('veiculos', JSON.stringify(storage))
+                        veiculos.get()
+                    }
+                })
+            },
+        }
+        veiculos.get()
+        veiculos.create()
+    </script>
+</body>
+</html>
